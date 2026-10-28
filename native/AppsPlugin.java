@@ -50,7 +50,15 @@ public class AppsPlugin extends Plugin {
     private void open(String action) {
         Intent i = new Intent(action);
         i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        getContext().startActivity(i);
+        try {
+            if (getActivity() != null) getActivity().startActivity(i);
+            else getContext().startActivity(i);
+        } catch (Exception e) {
+            Intent d = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+            d.setData(android.net.Uri.parse("package:" + getContext().getPackageName()));
+            d.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            getContext().startActivity(d);
+        }
     }
 
     @PluginMethod
