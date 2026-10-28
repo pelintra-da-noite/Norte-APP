@@ -17,6 +17,7 @@ jobs:
       - run: mkdir -p www && cp -n index.html www/index.html
       - run: npm install
       - run: npx cap add android
+      - run: pip install pillow && python3 icons.py
       - run: cp native/*.java android/app/src/main/java/pt/alexandre/norte/ && python3 native/patch.py
       - run: npx cap sync android
       - run: cd android && chmod +x gradlew && ./gradlew assembleDebug
