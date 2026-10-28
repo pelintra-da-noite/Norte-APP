@@ -319,8 +319,8 @@ function vDia(){
  ${mood(sd)}${vEcra()}`}
 let apps=[],use={},acc=false,aq="",asort="n",_ap=null;
 const AP=()=>{if(!isApk())return null;return _ap||(_ap=Capacitor.registerPlugin("Apps"))};
-let DG="",awaitUse=false;
-async function loadApps(){const P=AP();if(!P){DG="não está a correr como app Android";return}try{const h=await P.hasAccess();acc=!!h.value;DG="Android "+h.sdk+" · modo "+h.mode+" · permissão "+(h.perm?"sim":"não");if(!apps.length)apps=(await P.list()).apps;DG+=" · "+apps.length+" apps";use=acc?(await P.usage()).usage:{}}catch(e){DG="erro: "+((e&&e.message)||e);toast("Erro a ler as apps: "+((e&&e.message)||e))}if(view==="dia"||view==="rel")render()}
+const VER="v52";let DG="",awaitUse=false;
+async function loadApps(){const P=AP();if(!P){DG=VER+" · não está a correr como app Android";return}try{const h=await P.hasAccess();acc=!!h.value;DG=VER+" · Android "+h.sdk+" · modo "+h.mode+" · permissão "+(h.perm?"sim":"não");if(!apps.length)apps=(await P.list()).apps;DG+=" · "+apps.length+" apps";use=acc?(await P.usage()).usage:{}}catch(e){DG=VER+" · erro: "+((e&&e.message)||e);toast("Erro a ler as apps: "+((e&&e.message)||e))}if(view==="dia"||view==="rel")render()}
 const hm=m=>m>=60?Math.floor(m/60)+"h "+String(m%60).padStart(2,"0")+"m":m+"m";
 function vApps(){
  if(!AP())return `<h1>Apps</h1><p class="sub">O launcher e o tempo de ecrã por app só funcionam no APK instalado no Android.</p><div class="card glass">No navegador, o Android não deixa uma página ver as tuas apps. Compila o APK com o projeto do zip e instala-o.</div>`;
@@ -492,7 +492,7 @@ function bkImp(){const raw=val("#bk");if(!raw){toast("Cola primeiro a cópia na 
 async function openUse(){
  if(!isApk()){toast("Isto só funciona na app instalada (APK).");return}
  const P=AP();if(!P){toast("Plugin do tempo de ecrã não encontrado.");return}
- awaitUse=true;
+ awaitUse=true;toast("A abrir as definições do Android...");
  try{await P.openUsage()}catch(e){
   try{await P.openHome();toast("Procura 'Acesso ao uso' e ativa o Norte.")}catch(e2){toast("Não consegui abrir as definições: "+((e&&e.message)||e))}}
 }
@@ -582,6 +582,7 @@ function vPerfil(){return `<button class="x" data-a="nav" data-i="hoje" style="p
  <div class="card glass"><h2>A minha história</h2><button class="btn g" style="width:100%" data-a="nav" data-i="noite">Reler</button></div>
  <div class="card glass"><h2>Nome</h2><input data-c="nm" value="${esc(S.name)}" placeholder="O teu nome"></div>
  <div class="card glass"><h2>Cópia de segurança</h2><div class="sub" style="margin:0 0 12px">Guarda tudo (tarefas, hábitos, objetivos, diário, treinos) num texto. Cola-o numa nota ou envia-o a ti próprio. Se mudares de telemóvel ou reinstalares a app, cola-o aqui para restaurar.</div><div class="row" style="margin-bottom:12px"><button class="btn go" style="flex:1" data-a="bkshare">Partilhar</button><button class="btn g" style="flex:1" data-a="bkcopy">Copiar</button></div><textarea id="bk" rows="3" placeholder="Cola aqui a cópia para restaurar"></textarea><button class="btn g" style="width:100%;margin-top:10px" data-a="bkimp">Restaurar cópia</button></div>
+ <p class="sub" style="font-size:12px;text-align:center;opacity:.7;margin:4px 0 0">Norte ${VER}</p>
  <div class="card glass"><h2>Aparência</h2><div class="chips" style="margin:0;justify-content:flex-start"><button class="chip ${S.light?"":"on"}" data-a="mode" data-i="0">Escuro</button><button class="chip ${S.light?"on":""}" data-a="mode" data-i="1">Claro</button></div></div>`}
 const isApk=()=>!!(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform());
 async function sched(){try{const L=window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.LocalNotifications;if(!L)return;await L.requestPermissions();const p=await L.getPending();if(p.notifications.length)await L.cancel(p);if(S.rem.length)await L.schedule({notifications:S.rem.map((r,i)=>({id:i+1,title:"Norte",body:r.t,schedule:{on:{hour:+r.h.slice(0,2),minute:+r.h.slice(3)},allowWhileIdle:true}}))})}catch(e){}}
