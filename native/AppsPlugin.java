@@ -40,11 +40,22 @@ public class AppsPlugin extends Plugin {
         return "data:image/png;base64," + Base64.encodeToString(o.toByteArray(), Base64.NO_WRAP);
     }
 
-    private boolean access() {
+    private int mode() {
         Context ctx = getContext();
         AppOpsManager a = (AppOpsManager) ctx.getSystemService(Context.APP_OPS_SERVICE);
-        int m = a.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, Process.myUid(), ctx.getPackageName());
-        return m == AppOpsManager.MODE_ALLOWED;
+        return a.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, Process.myUid(), ctx.getPackageName());
+    }
+
+    private boolean perm() {
+        return getContext().checkCallingOrSelfPermission("android.permission.PACKAGE_USAGE_STATS")
+                == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private boolean access() {
+        int m = mode();
+        if (m == AppOpsManager.MODE_ALLOWED) return true;
+        if (m == AppOpsManager.MODE_DEFAULT) return perm();
+        return false;
     }
 
     private void open(String action) {
@@ -91,6 +102,9 @@ public class AppsPlugin extends Plugin {
     public void hasAccess(PluginCall call) {
         JSObject o = new JSObject();
         o.put("value", access());
+        o.put("mode", mode());
+        o.put("perm", perm());
+        o.put("sdk", android.os.Build.VERSION.SDK_INT);
         call.resolve(o);
     }
 
@@ -131,7 +145,14 @@ public class AppsPlugin extends Plugin {
 
     @PluginMethod
     public void openUsage(PluginCall call) {
-        open(Settings.ACTION_USAGE_ACCESS_SETTINGS);
+        try {
+            Intent i = new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS);
+            i.setData(android.net.Uri.parse("package:" + getContext().getPackageName()));
+            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            getContext().startActivity(i);
+        } catch (Exception e) {
+            open(Settings.ACTION_USAGE_ACCESS_SETTINGS);
+        }
         call.resolve();
     }
 
