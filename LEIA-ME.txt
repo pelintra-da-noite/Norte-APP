@@ -1,7 +1,0 @@
-NORTE - como obter o APK (sem Android Studio)
-1. Cria conta gratuita em github.com e um repositorio novo (privado serve).
-2. Carrega TODO o conteudo desta pasta (incluindo as pastas .github e native) para o repositorio.
-3. Separador "Actions" > "Compilar APK" > espera ~5 min pelo visto verde.
-4. Abre a execucao, em "Artifacts" descarrega "norte-apk", extrai, e passa o app-debug.apk para o telemovel.
-5. No Android: instala (permite fontes desconhecidas). Na app, separador Apps: dá "Acesso ao uso" e, se quiseres, define o Norte como launcher.
-Se a compilacao falhar, copia o erro do passo vermelho e envia-o.
