@@ -14,6 +14,7 @@ jobs:
         with:
           distribution: temurin
           java-version: 21
+      - run: mkdir -p www && cp -n index.html www/index.html
       - run: npm install
       - run: npx cap add android
       - run: cp native/*.java android/app/src/main/java/pt/alexandre/norte/ && python3 native/patch.py
