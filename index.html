@@ -318,7 +318,8 @@ function vDia(){
  ${mood(sd)}${vEcra()}`}
 let apps=[],use={},acc=false,aq="",asort="n",_ap=null;
 const AP=()=>{if(!isApk())return null;return _ap||(_ap=Capacitor.registerPlugin("Apps"))};
-async function loadApps(){const P=AP();if(!P)return;try{acc=(await P.hasAccess()).value;if(!apps.length)apps=(await P.list()).apps;use=acc?(await P.usage()).usage:{}}catch(e){toast("Erro a ler as apps: "+e.message)}if(view==="dia"||view==="rel")render()}
+let DG="",awaitUse=false;
+async function loadApps(){const P=AP();if(!P){DG="não está a correr como app Android";return}try{const h=await P.hasAccess();acc=!!h.value;DG="Android "+h.sdk+" · modo "+h.mode+" · permissão "+(h.perm?"sim":"não");if(!apps.length)apps=(await P.list()).apps;DG+=" · "+apps.length+" apps";use=acc?(await P.usage()).usage:{}}catch(e){DG="erro: "+((e&&e.message)||e);toast("Erro a ler as apps: "+((e&&e.message)||e))}if(view==="dia"||view==="rel")render()}
 const hm=m=>m>=60?Math.floor(m/60)+"h "+String(m%60).padStart(2,"0")+"m":m+"m";
 function vApps(){
  if(!AP())return `<h1>Apps</h1><p class="sub">O launcher e o tempo de ecrã por app só funcionam no APK instalado no Android.</p><div class="card glass">No navegador, o Android não deixa uma página ver as tuas apps. Compila o APK com o projeto do zip e instala-o.</div>`;
@@ -490,13 +491,14 @@ function bkImp(){const raw=val("#bk");if(!raw){toast("Cola primeiro a cópia na 
 async function openUse(){
  if(!isApk()){toast("Isto só funciona na app instalada (APK).");return}
  const P=AP();if(!P){toast("Plugin do tempo de ecrã não encontrado.");return}
+ awaitUse=true;
  try{await P.openUsage()}catch(e){
   try{await P.openHome();toast("Procura 'Acesso ao uso' e ativa o Norte.")}catch(e2){toast("Não consegui abrir as definições: "+((e&&e.message)||e))}}
 }
 function askScr(){if(!isApk()||S.scr)return;S.scr=1;save();setTimeout(()=>{try{if(confirm("O Norte quer ler o tempo de ecrã das tuas apps neste telemóvel. Ativar agora?")){openUse()}}catch(e){}},700)}
 function vEcra(){
  if(!isApk())return `<div class="card"><h2>Tempo de ecrã</h2><div class="sub" style="margin:0">Indisponível no navegador. Instala o APK para a app ler o tempo de ecrã automaticamente.</div></div>`;
- if(!acc)return `<div class="card"><h2>Tempo de ecrã</h2><div class="sub" style="margin:0 0 12px">Indisponível. Autoriza o acesso para o Norte ler o tempo de cada app.</div><button class="btn go" style="width:100%" data-a="aacc">Ativar</button></div>`;
+ if(!acc)return `<div class="card"><h2>Tempo de ecrã</h2><div class="sub" style="margin:0 0 12px">Indisponível. Autoriza o acesso para o Norte ler o tempo de cada app.</div><button class="btn go" style="width:100%" data-a="aacc">Ativar</button><p class="sub" style="font-size:11px;margin:10px 0 0;opacity:.7">${esc(DG)}</p></div>`;
  const l=apps.filter(a=>use[a.pkg]).sort((a,b)=>use[b.pkg]-use[a.pkg]).slice(0,6),tot=scrTot(),top=l[0];
  return `<div class="card"><h2>Tempo de ecrã hoje</h2><div class="big2" style="margin:6px 0 12px;font-size:40px">${hm(tot)}</div>${l.map(a=>`<div class="it"><img src="${a.icon}" style="width:32px;height:32px;border-radius:10px"><span class="sp">${esc(a.label)}</span><b>${hm(use[a.pkg])}</b></div>`).join("")}${top?`<div class="card glass" style="margin:12px 0 0">${esc(top.label)} ocupa ${Math.round(use[top.pkg]/tot*100)}% do teu ecrã. ${use[top.pkg]/tot>.4?"Define um limite e deixa-a fora do alcance durante o foco.":"A distribuição está equilibrada."}</div>`:""}</div>`}
 const TOR=26,HDL=9.5,LL=19,AL=11;
@@ -750,7 +752,7 @@ function act(a,i,j){
 function swap(){T.mode=T.mode==="work"?"brk":"work";T.len=T.left=(T.mode==="work"?S.set.work:S.set.brk)*60;T.dist=0}
 function finish(){T.run=false;lock(false);if(T.mode==="work"){S.sessions.push({d:dk(),m:Math.round(T.len/60),x:T.dist});toast("Sessão concluída. Mereces a pausa.")}else toast("Pausa terminada. Volta ao foco.");beep();swap();save();render()}
 setInterval(()=>{if(!T.run)return;T.left=Math.max(0,Math.ceil((T.end-Date.now())/1000));if(T.left<=0)return finish();const e=$("#tm");if(e){e.textContent=fmt(T.left);$("#pb").style.width=(100-T.left/T.len*100)+"%";const ob=$(".orb.bl");if(ob)ob.style.setProperty("--oh",ohue())}},250);
-document.addEventListener("visibilitychange",()=>{if(!document.hidden&&isApk()&&!acc)loadApps();if(document.hidden){if(T.run&&T.mode==="work"){T.dist++;T.away=true}}else{lock(T.run);if(T.away){T.away=false;toast("Saíste da app durante o foco. Distrações nesta sessão: "+T.dist)}}});
+document.addEventListener("visibilitychange",()=>{if(!document.hidden&&isApk()&&(!acc||awaitUse)){const w=awaitUse;awaitUse=false;loadApps().then(()=>{if(w)toast(acc?"Acesso ativo. A ler o tempo de ecrã.":"Acesso ainda desativado. "+DG)})}if(document.hidden){if(T.run&&T.mode==="work"){T.dist++;T.away=true}}else{lock(T.run);if(T.away){T.away=false;toast("Saíste da app durante o foco. Distrações nesta sessão: "+T.dist)}}});
 document.addEventListener("click",e=>{const mn=e.target.closest("nav div.mini");if(mn){mn.classList.remove("mini");return}if(view==="rel"&&!e.target.closest('[data-a="nav"]')&&!e.target.closest("nav")){act("rnext");return}const b=e.target.closest("[data-a]");if(!b)return;const a=b.dataset.a,i=b.dataset.i,j=b.dataset.j,ck=b.classList.contains("ck"),
  run=()=>{act(a,i,j);if(ck){const n=[...document.querySelectorAll(`[data-a="${a}"]`)].find(x=>x.dataset.i===i&&x.dataset.j===j);if(n)n.classList.add("pop")}},
  fin=a==="stog"&&(()=>{const g=S.goals.find(x=>x.id===Number(i));return !!g&&!g.steps[Number(j)].d&&g.steps.every((z,q)=>z.d||q===Number(j))})();
