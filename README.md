@@ -1,3 +1,5 @@
+<p align="center"><img src="icon.png" alt="Norte" width="140"></p>
+
 # Norte
 
 App pessoal de Android para foco, hábitos, objetivos, treino e meditação. Feita por Alexandre Serras para uso próprio e partilhada com quem quiser experimentar.
@@ -30,7 +32,7 @@ Tudo fica guardado **no teu telemóvel**. A app não tem conta, não envia dados
 4. Na primeira abertura, escreve o teu nome.
 5. Para ver o tempo de ecrã, carrega em **Ativar** e dá "Acesso ao uso" à Norte. Permite também as notificações, para os lembretes avisarem.
 
-Só funciona em Android. Para já, não há versão para iPhone.
+Só funciona em Android. Não há versão para iPhone.
 
 ## Aviso
 
@@ -43,3 +45,4 @@ Só funciona em Android. Para já, não há versão para iPhone.
 - O APK é compilado automaticamente pelo GitHub Actions (`.github/workflows/apk.yml`) a cada alteração.
 - O tempo de ecrã vem de um pequeno plugin nativo em Java, na pasta `native/`.
 
+Para compilares tu mesmo: faz fork deste repositório, ativa as Actions e corre o workflow **Compilar APK**. O APK fica em *Artifacts*.
