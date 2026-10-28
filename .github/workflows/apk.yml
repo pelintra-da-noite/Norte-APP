@@ -14,12 +14,15 @@ jobs:
         with:
           distribution: temurin
           java-version: 21
-      - run: mkdir -p www && cp -n index.html www/index.html
+      - run: mkdir -p www && cp -f index.html www/index.html
       - run: npm install
       - run: npx cap add android
       - run: pip install pillow && python3 icons.py
       - run: cp native/*.java android/app/src/main/java/pt/alexandre/norte/ && python3 native/patch.py
       - run: npx cap sync android
+      - run: |
+          echo "Versao no index.html da raiz:"; grep -o 'const VER="[^"]*"' index.html || echo "(sem VER)"
+          echo "Versao dentro do APK:"; grep -o 'const VER="[^"]*"' android/app/src/main/assets/public/index.html || echo "(sem VER)"
       - run: python3 native/sign.py
         env:
           KS_B64: ${{ secrets.KS_B64 }}
